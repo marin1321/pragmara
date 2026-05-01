@@ -68,17 +68,10 @@ export function DocumentUpload({ kbId }: DocumentUploadProps) {
           Drag & drop a file here, or
         </p>
         <label className="mt-2 cursor-pointer">
-          <Button
-            variant="ghost"
-            size="sm"
-            className="text-accent"
-            asChild
-          >
-            <span>
-              <FileUp className="mr-1 h-4 w-4" />
-              Browse files
-            </span>
-          </Button>
+          <span className="inline-flex items-center gap-1 rounded-md px-3 py-1.5 text-sm font-medium text-accent hover:bg-accent-dim transition-colors">
+            <FileUp className="h-4 w-4" />
+            Browse files
+          </span>
           <input
             type="file"
             accept={ACCEPTED_TYPES}
