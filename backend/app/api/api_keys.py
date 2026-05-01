@@ -77,7 +77,7 @@ async def list_api_keys(
 
     result = await db.execute(
         select(APIKey)
-        .where(APIKey.kb_id == kb_id, APIKey.is_active == True)
+        .where(APIKey.kb_id == kb_id, APIKey.is_active.is_(True))
         .order_by(APIKey.created_at.desc())
     )
     keys = result.scalars().all()

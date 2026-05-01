@@ -53,7 +53,7 @@ async def get_api_key_auth(
     result = await db.execute(
         select(APIKey).where(
             APIKey.key_hash == key_hash,
-            APIKey.is_active == True,
+            APIKey.is_active.is_(True),
         )
     )
     api_key = result.scalar_one_or_none()

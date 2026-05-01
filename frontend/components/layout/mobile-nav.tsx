@@ -25,10 +25,10 @@ export function MobileNav() {
   return (
     <header className="flex h-14 items-center border-b border-border bg-background px-4 md:hidden">
       <Sheet open={open} onOpenChange={setOpen}>
-        <SheetTrigger asChild>
-          <Button variant="ghost" size="icon" className="mr-3">
-            <Menu className="h-5 w-5" />
-          </Button>
+        <SheetTrigger
+          render={<Button variant="ghost" size="icon" className="mr-3" />}
+        >
+          <Menu className="h-5 w-5" />
         </SheetTrigger>
         <SheetContent side="left" className="w-[260px] bg-background p-0">
           <div className="flex h-14 items-center px-6">

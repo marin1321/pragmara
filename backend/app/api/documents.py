@@ -64,7 +64,7 @@ async def upload_document(
     if len(content) > MAX_FILE_SIZE:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail=f"File too large. Maximum size: 50MB",
+            detail="File too large. Maximum size: 50MB",
         )
 
     tmp_dir = Path(tempfile.mkdtemp())
