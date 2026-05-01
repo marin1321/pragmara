@@ -22,8 +22,9 @@ export default function LoginPage() {
     try {
       await api.post("/auth/magic-link", { email });
       setIsSent(true);
-    } catch (err: any) {
-      setError(err.response?.data?.detail || "Something went wrong. Try again.");
+    } catch (err: unknown) {
+      const error = err as { response?: { data?: { detail?: string } } };
+      setError(error.response?.data?.detail || "Something went wrong. Try again.");
     } finally {
       setIsLoading(false);
     }

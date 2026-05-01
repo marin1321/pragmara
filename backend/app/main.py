@@ -24,9 +24,16 @@ def create_app() -> FastAPI:
         lifespan=lifespan,
     )
 
+    allowed_origins = [settings.frontend_url]
+    if settings.app_env == "production":
+        allowed_origins.extend([
+            "https://pragmara.vercel.app",
+            "https://pragmara-app.vercel.app",
+        ])
+
     app.add_middleware(
         CORSMiddleware,
-        allow_origins=[settings.frontend_url],
+        allow_origins=allowed_origins,
         allow_credentials=True,
         allow_methods=["*"],
         allow_headers=["*"],

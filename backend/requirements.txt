@@ -26,13 +26,16 @@ celery==5.4.0
 
 # AI / LLM
 langchain==0.3.14
+langchain-text-splitters==0.3.4
 langchain-groq==0.2.4
+groq==0.13.0
 voyageai==0.3.2
 tiktoken==0.8.0
 
 # Document Parsing
 pymupdf==1.25.3
 beautifulsoup4==4.12.3
+requests==2.32.3
 
 # Observability
 langsmith==0.2.10

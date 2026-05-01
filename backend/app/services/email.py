@@ -11,7 +11,7 @@ async def send_magic_link(email: str, token: str) -> None:
     if settings.is_development:
         logger.info(f"[DEV] Magic link for {email}: {verify_url}")
         print(f"\n{'='*60}")
-        print(f"  MAGIC LINK (dev mode)")
+        print("  MAGIC LINK (dev mode)")
         print(f"  Email: {email}")
         print(f"  URL: {verify_url}")
         print(f"{'='*60}\n")

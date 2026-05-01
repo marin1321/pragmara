@@ -101,14 +101,16 @@ export default function KBSettingsPage() {
             history permanently. This action cannot be undone.
           </p>
           <Dialog open={deleteOpen} onOpenChange={setDeleteOpen}>
-            <DialogTrigger asChild>
-              <Button
-                variant="outline"
-                className="border-danger text-danger hover:bg-danger/10"
-              >
-                <Trash2 className="mr-2 h-4 w-4" />
-                Delete Knowledge Base
-              </Button>
+            <DialogTrigger
+              render={
+                <Button
+                  variant="outline"
+                  className="border-danger text-danger hover:bg-danger/10"
+                />
+              }
+            >
+              <Trash2 className="mr-2 h-4 w-4" />
+              Delete Knowledge Base
             </DialogTrigger>
             <DialogContent className="border-border bg-surface">
               <DialogHeader>

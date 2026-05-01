@@ -2,17 +2,21 @@
 
 import { useParams } from "next/navigation";
 import Link from "next/link";
-import { ArrowLeft, FileText, Settings, Upload } from "lucide-react";
+import { ArrowLeft, MessageSquare, Settings } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useKnowledgeBase } from "@/hooks/use-knowledge-bases";
+import { useDocuments } from "@/hooks/use-documents";
+import { DocumentUpload } from "@/components/kb/document-upload";
+import { DocumentList } from "@/components/kb/document-list";
 
 export default function KBOverviewPage() {
   const params = useParams();
   const id = params.id as string;
   const { data: kb, isLoading } = useKnowledgeBase(id);
+  const { data: docsData } = useDocuments(id);
 
   if (isLoading) {
     return (
@@ -61,11 +65,19 @@ export default function KBOverviewPage() {
             <p className="mt-1 text-sm text-text-secondary">{kb.description}</p>
           )}
         </div>
-        <Link href={`/kb/${id}/settings`}>
-          <Button variant="ghost" size="icon" className="text-text-secondary">
-            <Settings className="h-5 w-5" />
-          </Button>
-        </Link>
+        <div className="flex gap-2">
+          <Link href={`/kb/${id}/query`}>
+            <Button className="bg-accent text-white hover:bg-accent-hover">
+              <MessageSquare className="mr-2 h-4 w-4" />
+              Query
+            </Button>
+          </Link>
+          <Link href={`/kb/${id}/settings`}>
+            <Button variant="ghost" size="icon" className="text-text-secondary">
+              <Settings className="h-5 w-5" />
+            </Button>
+          </Link>
+        </div>
       </div>
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
@@ -91,23 +103,11 @@ export default function KBOverviewPage() {
         </Card>
       </div>
 
-      <Card className="border-border bg-surface">
-        <CardContent className="flex flex-col items-center justify-center py-12">
-          <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-surface-2">
-            <FileText className="h-7 w-7 text-text-muted" />
-          </div>
-          <h3 className="mt-4 text-lg font-medium text-text-primary">
-            No documents yet
-          </h3>
-          <p className="mt-2 text-center text-sm text-text-secondary">
-            Upload PDFs, Markdown files, or submit URLs to start indexing
-          </p>
-          <Button className="mt-6 bg-accent text-white hover:bg-accent-hover" disabled>
-            <Upload className="mr-2 h-4 w-4" />
-            Upload Documents (Phase 2)
-          </Button>
-        </CardContent>
-      </Card>
+      <div className="space-y-4">
+        <h2 className="text-lg font-semibold text-text-primary">Documents</h2>
+        <DocumentUpload kbId={id} />
+        {docsData && <DocumentList kbId={id} documents={docsData.items} />}
+      </div>
     </div>
   );
 }
