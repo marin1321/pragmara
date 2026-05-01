@@ -1,4 +1,3 @@
-import redis.asyncio as aioredis
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -6,16 +5,13 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.api.dependencies import get_current_user
 from app.core.config import settings
 from app.core.database import get_db
+from app.core.redis import get_redis
 from app.core.security import create_access_token, generate_magic_token
 from app.models.user import User
 from app.schemas.auth import MagicLinkRequest, TokenResponse, UserResponse
 from app.services.email import send_magic_link
 
 router = APIRouter(prefix="/auth", tags=["Authentication"])
-
-
-async def get_redis() -> aioredis.Redis:
-    return aioredis.from_url(settings.redis_url, decode_responses=True)
 
 
 @router.post("/magic-link", status_code=status.HTTP_200_OK)
@@ -39,7 +35,6 @@ async def request_magic_link(
         str(user.id),
         ex=settings.magic_link_expire_minutes * 60,
     )
-    await redis.aclose()
 
     await send_magic_link(body.email, token)
 
@@ -58,7 +53,6 @@ async def verify_magic_link(token: str) -> TokenResponse:
         )
 
     await redis.delete(f"magic:{token}")
-    await redis.aclose()
 
     import uuid
 

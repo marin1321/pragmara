@@ -1,11 +1,12 @@
 import uuid
 
 from fastapi import APIRouter, Depends, HTTPException, status
-from sqlalchemy import func, select
+from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.api.dependencies import get_current_user
 from app.core.database import get_db
+from app.core.qdrant import create_collection, delete_collection
 from app.core.utils import generate_collection_name, slugify
 from app.models.knowledge_base import KnowledgeBase
 from app.models.user import User
@@ -58,6 +59,8 @@ async def create_knowledge_base(
     db.add(kb)
     await db.flush()
     await db.refresh(kb)
+
+    await create_collection(collection_name)
 
     return kb
 
@@ -137,4 +140,5 @@ async def delete_knowledge_base(
             detail="Knowledge base not found",
         )
 
+    await delete_collection(kb.qdrant_collection)
     await db.delete(kb)
