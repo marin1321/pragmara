@@ -9,7 +9,6 @@ from app.services.ingestion.embedder import EmbeddingService
 from app.services.retrieval.hybrid_search import HybridSearcher
 from app.services.retrieval.llm_streamer import LLMStreamer
 from app.services.retrieval.prompt_builder import PromptBuilder
-from app.services.usage import UsageTracker
 
 router = APIRouter(prefix="/v1/kb/{kb_id}", tags=["Query"])
 

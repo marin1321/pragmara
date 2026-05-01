@@ -4,7 +4,7 @@ import { useCallback, useRef, useState } from "react";
 import { Send } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { CitationsPanel } from "./citations-panel";
-import { streamQuery, SSEEvent } from "@/lib/sse-client";
+import { streamQuery } from "@/lib/sse-client";
 
 interface Message {
   role: "user" | "assistant";
@@ -83,13 +83,14 @@ export function QueryConsole({ kbId, apiKey }: QueryConsoleProps) {
             });
           }
         }
-      } catch (err: any) {
-        if (err.name !== "AbortError") {
+      } catch (err: unknown) {
+        const error = err as Error;
+        if (error.name !== "AbortError") {
           setMessages((prev) => {
             const updated = [...prev];
             const last = updated[updated.length - 1];
             if (last.role === "assistant") {
-              last.content = `Error: ${err.message}`;
+              last.content = `Error: ${error.message}`;
             }
             return updated;
           });

@@ -1,6 +1,5 @@
 import json
 import logging
-import time
 from collections.abc import AsyncGenerator
 
 from groq import AsyncGroq

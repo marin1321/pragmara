@@ -1,10 +1,10 @@
 "use client";
 
 import { useState } from "react";
-import { Copy, Key, Plus, Trash2 } from "lucide-react";
+import { Copy, Key, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { useAPIKeys, useCreateAPIKey, useRevokeAPIKey } from "@/hooks/use-api-keys";
+import { useAPIKeys, useCreateAPIKey } from "@/hooks/use-api-keys";
 
 interface APIKeyManagerProps {
   kbId: string;
@@ -15,7 +15,6 @@ interface APIKeyManagerProps {
 export function APIKeyManager({ kbId, selectedKey, onSelectKey }: APIKeyManagerProps) {
   const { data } = useAPIKeys(kbId);
   const createKey = useCreateAPIKey(kbId);
-  const revokeKey = useRevokeAPIKey(kbId);
   const [newKeyName, setNewKeyName] = useState("");
   const [showCreate, setShowCreate] = useState(false);
   const [createdKey, setCreatedKey] = useState<string | null>(null);

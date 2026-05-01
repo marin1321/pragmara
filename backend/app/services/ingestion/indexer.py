@@ -4,8 +4,7 @@ import uuid
 from qdrant_client import QdrantClient
 from qdrant_client.models import PointStruct, Filter, FieldCondition, MatchValue
 
-from app.core.config import settings
-from app.core.qdrant import VECTOR_SIZE, get_qdrant_client
+from app.core.qdrant import get_qdrant_client
 
 logger = logging.getLogger(__name__)
 
