@@ -2,7 +2,7 @@
 
 import { useParams } from "next/navigation";
 import Link from "next/link";
-import { ArrowLeft, MessageSquare, Settings } from "lucide-react";
+import { ArrowLeft, BarChart3, MessageSquare, Settings } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
@@ -70,6 +70,12 @@ export default function KBOverviewPage() {
             <Button className="bg-accent text-white hover:bg-accent-hover">
               <MessageSquare className="mr-2 h-4 w-4" />
               Query
+            </Button>
+          </Link>
+          <Link href={`/kb/${id}/analytics`}>
+            <Button variant="ghost" className="text-text-secondary">
+              <BarChart3 className="mr-2 h-4 w-4" />
+              Analytics
             </Button>
           </Link>
           <Link href={`/kb/${id}/settings`}>
