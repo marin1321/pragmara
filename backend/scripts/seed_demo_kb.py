@@ -12,15 +12,13 @@ The script outputs the DEMO_KB_ID to configure in your environment.
 """
 
 import asyncio
-import os
 import sys
 import uuid
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
-from app.core.config import settings  # noqa: E402
-from app.core.database import async_session_factory, engine  # noqa: E402
+from app.core.database import async_session_factory  # noqa: E402
 from app.models.user import User  # noqa: E402
 from app.models.knowledge_base import KnowledgeBase  # noqa: E402
 from app.models.document import Document  # noqa: E402
