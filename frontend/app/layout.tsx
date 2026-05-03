@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Inter, JetBrains_Mono, Syne } from "next/font/google";
+import { Toaster } from "sonner";
 import { Providers } from "@/lib/providers";
 import "./globals.css";
 
@@ -38,6 +39,13 @@ export default function RootLayout({
         className={`${inter.variable} ${jetbrainsMono.variable} ${syne.variable} font-sans antialiased`}
       >
         <Providers>{children}</Providers>
+        <Toaster
+          theme="dark"
+          position="bottom-right"
+          toastOptions={{
+            style: { background: "var(--surface)", border: "1px solid var(--border)", color: "var(--text-primary)" },
+          }}
+        />
       </body>
     </html>
   );

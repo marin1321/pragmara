@@ -1,5 +1,7 @@
 "use client";
 
+import { useEffect } from "react";
+import { useRouter, usePathname } from "next/navigation";
 import { Sidebar } from "./sidebar";
 import { MobileNav } from "./mobile-nav";
 
@@ -8,6 +10,24 @@ interface AppShellProps {
 }
 
 export function AppShell({ children }: AppShellProps) {
+  const router = useRouter();
+  const pathname = usePathname();
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.key === "k") {
+        e.preventDefault();
+        const kbMatch = pathname.match(/\/kb\/([^/]+)/);
+        if (kbMatch) {
+          router.push(`/kb/${kbMatch[1]}/query`);
+        }
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [router, pathname]);
+
   return (
     <div className="flex h-screen overflow-hidden">
       <Sidebar />

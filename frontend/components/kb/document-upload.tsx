@@ -4,6 +4,7 @@ import { useCallback, useState } from "react";
 import { FileUp, Globe, Upload } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { toast } from "sonner";
 import { useUploadDocument, useSubmitURL } from "@/hooks/use-documents";
 
 interface DocumentUploadProps {
@@ -22,10 +23,14 @@ export function DocumentUpload({ kbId }: DocumentUploadProps) {
   const handleFile = useCallback(
     (file: File) => {
       if (file.size > MAX_SIZE) {
-        alert("File too large. Maximum size is 50MB.");
+        toast.error("File too large. Maximum size is 50MB.");
         return;
       }
-      uploadDoc.mutate(file);
+      toast.info(`Uploading ${file.name}...`);
+      uploadDoc.mutate(file, {
+        onSuccess: () => toast.success(`${file.name} uploaded — processing started`),
+        onError: () => toast.error(`Failed to upload ${file.name}`),
+      });
     },
     [uploadDoc]
   );

@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { Copy, Key, Plus } from "lucide-react";
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useAPIKeys, useCreateAPIKey } from "@/hooks/use-api-keys";
@@ -26,11 +27,13 @@ export function APIKeyManager({ kbId, selectedKey, onSelectKey }: APIKeyManagerP
     onSelectKey(result.key);
     setNewKeyName("");
     setShowCreate(false);
+    toast.success("API key created successfully");
   };
 
   const copyKey = () => {
     if (createdKey) {
       navigator.clipboard.writeText(createdKey);
+      toast.success("Key copied to clipboard");
     }
   };
 
