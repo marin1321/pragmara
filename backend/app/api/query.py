@@ -9,6 +9,7 @@ from app.services.ingestion.embedder import EmbeddingService
 from app.services.retrieval.hybrid_search import HybridSearcher
 from app.services.retrieval.llm_streamer import LLMStreamer
 from app.services.retrieval.prompt_builder import PromptBuilder
+from app.services.retrieval.reranker import Reranker
 
 router = APIRouter(prefix="/v1/kb/{kb_id}", tags=["Query"])
 
@@ -29,17 +30,16 @@ async def query_knowledge_base(
         )
 
     max_results = body.get("max_results", 5)
+    use_rerank = body.get("rerank", True)
 
-    # Embed the query
     embedder = EmbeddingService()
     query_embedding = await embedder.embed_query(question)
 
-    # Search for relevant chunks
     searcher = HybridSearcher()
     search_results = searcher.search(
         kb_id=str(kb_id),
         query_embedding=query_embedding,
-        top_k=max_results,
+        top_k=max_results * 2 if use_rerank else max_results,
     )
 
     if not search_results:
@@ -48,11 +48,13 @@ async def query_knowledge_base(
             detail="No indexed documents found for this knowledge base. Upload documents first.",
         )
 
-    # Build prompt with context
+    if use_rerank:
+        reranker = Reranker()
+        search_results = await reranker.rerank(question, search_results, top_k=max_results)
+
     prompt_builder = PromptBuilder()
     prompt, used_citations = prompt_builder.build(question, search_results)
 
-    # Stream LLM response
     streamer = LLMStreamer()
 
     async def event_generator():
