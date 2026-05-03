@@ -8,6 +8,8 @@ from fastapi.responses import StreamingResponse
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.database import get_db, async_session_factory
+from app.core.embedding_cache import cache_embedding, get_cached_embedding
+from app.core.rate_limiter import RateLimitExceeded, check_rate_limit
 from app.models.query import Query
 from app.services.ingestion.embedder import EmbeddingService
 from app.services.evaluation.scorer import EvaluationService
@@ -36,11 +38,28 @@ async def query_knowledge_base(
             detail="Question is required",
         )
 
+    api_key_id = request.headers.get("X-Pragmara-Key", "anonymous")
+    rate_headers = {}
+    try:
+        rate_headers = await check_rate_limit(api_key_id)
+    except RateLimitExceeded as e:
+        raise HTTPException(
+            status_code=status.HTTP_429_TOO_MANY_REQUESTS,
+            detail=str(e),
+            headers={"Retry-After": str(e.retry_after)},
+        )
+
     max_results = body.get("max_results", 5)
     use_rerank = body.get("rerank", True)
 
-    embedder = EmbeddingService()
-    query_embedding = await embedder.embed_query(question)
+    cached = await get_cached_embedding(question)
+    if cached:
+        query_embedding = cached
+        logger.info("Embedding cache HIT for query")
+    else:
+        embedder = EmbeddingService()
+        query_embedding = await embedder.embed_query(question)
+        await cache_embedding(question, query_embedding)
 
     searcher = HybridSearcher()
     search_results = searcher.search(
@@ -89,14 +108,17 @@ async def query_knowledge_base(
                 )
             )
 
+    response_headers = {
+        "Cache-Control": "no-cache",
+        "Connection": "keep-alive",
+        "X-Accel-Buffering": "no",
+        **rate_headers,
+    }
+
     return StreamingResponse(
         event_generator(),
         media_type="text/event-stream",
-        headers={
-            "Cache-Control": "no-cache",
-            "Connection": "keep-alive",
-            "X-Accel-Buffering": "no",
-        },
+        headers=response_headers,
     )
 
 

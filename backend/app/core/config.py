@@ -38,6 +38,9 @@ class Settings(BaseSettings):
     groq_api_key: str = ""
     voyage_api_key: str = ""
 
+    # Cache
+    embedding_cache_ttl: int = 3600
+
     # Observability
     langsmith_api_key: str = ""
     langsmith_project: str = "pragmara"
