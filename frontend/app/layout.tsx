@@ -23,9 +23,34 @@ const syne = Syne({
 });
 
 export const metadata: Metadata = {
-  title: "Pragmara — RAG-as-a-Service for Technical Documentation",
+  title: {
+    default: "Pragmara — RAG-as-a-Service for Technical Documentation",
+    template: "%s | Pragmara",
+  },
   description:
     "Upload your docs, get a query API. Streaming answers with citations, evaluation scores, and cost tracking.",
+  metadataBase: new URL("https://pragmara.vercel.app"),
+  openGraph: {
+    type: "website",
+    locale: "en_US",
+    url: "https://pragmara.vercel.app",
+    siteName: "Pragmara",
+    title: "Pragmara — RAG-as-a-Service for Technical Documentation",
+    description:
+      "Upload documentation. Get a query API. Streaming answers with citations and evaluation scores.",
+    images: [{ url: "/opengraph-image", width: 1200, height: 630, alt: "Pragmara" }],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Pragmara — RAG-as-a-Service for Technical Documentation",
+    description:
+      "Upload documentation. Get a query API. Streaming answers with citations and evaluation scores.",
+    images: ["/opengraph-image"],
+  },
+  robots: {
+    index: true,
+    follow: true,
+  },
 };
 
 export default function RootLayout({
