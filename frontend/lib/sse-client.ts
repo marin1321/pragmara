@@ -96,3 +96,62 @@ export async function* streamQuery(
     }
   }
 }
+
+export async function* streamDemoQuery(
+  question: string,
+  signal?: AbortSignal
+): AsyncGenerator<SSEEvent> {
+  const response = await fetch(`${API_BASE_URL}/v1/demo/query`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ question }),
+    signal,
+  });
+
+  if (!response.ok) {
+    const error = await response.json().catch(() => ({ detail: "Request failed" }));
+    throw new Error(error.detail || `HTTP ${response.status}`);
+  }
+
+  const reader = response.body?.getReader();
+  if (!reader) throw new Error("No response body");
+
+  const decoder = new TextDecoder();
+  let buffer = "";
+
+  while (true) {
+    const { done, value } = await reader.read();
+    if (done) break;
+
+    buffer += decoder.decode(value, { stream: true });
+
+    const lines = buffer.split("\n");
+    buffer = lines.pop() || "";
+
+    for (const line of lines) {
+      if (line.startsWith("data: ")) {
+        const jsonStr = line.slice(6).trim();
+        if (jsonStr) {
+          try {
+            const event = JSON.parse(jsonStr) as SSEEvent;
+            yield event;
+          } catch {
+            // Skip malformed events
+          }
+        }
+      }
+    }
+  }
+
+  if (buffer.startsWith("data: ")) {
+    const jsonStr = buffer.slice(6).trim();
+    if (jsonStr) {
+      try {
+        const event = JSON.parse(jsonStr) as SSEEvent;
+        yield event;
+      } catch {
+        // Skip
+      }
+    }
+  }
+}
