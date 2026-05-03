@@ -7,6 +7,7 @@ from app.api.documents import router as documents_router
 from app.api.query import router as query_router
 from app.api.api_keys import router as api_keys_router
 from app.api.analytics import router as analytics_router
+from app.api.demo import router as demo_router
 
 api_router = APIRouter()
 api_router.include_router(health_router)
@@ -16,3 +17,4 @@ api_router.include_router(documents_router)
 api_router.include_router(query_router)
 api_router.include_router(api_keys_router)
 api_router.include_router(analytics_router)
+api_router.include_router(demo_router)

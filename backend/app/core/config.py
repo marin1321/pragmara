@@ -41,6 +41,9 @@ class Settings(BaseSettings):
     # Cache
     embedding_cache_ttl: int = 3600
 
+    # Demo
+    demo_kb_id: str = ""
+
     # Observability
     langsmith_api_key: str = ""
     langsmith_project: str = "pragmara"
