@@ -32,6 +32,7 @@ groq==0.13.0
 voyageai==0.3.2
 tiktoken==0.8.0
 sentence-transformers==3.3.1
+numpy>=1.26.0
 
 # Document Parsing
 pymupdf==1.25.3
