@@ -72,6 +72,8 @@ def create_app() -> FastAPI:
         allowed_origins.extend([
             "https://pragmara.vercel.app",
             "https://pragmara-app.vercel.app",
+            "https://www.oscarmarindev.com",
+            "https://oscarmarindev.com",
         ])
 
     app.add_middleware(
