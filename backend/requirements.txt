@@ -1,6 +1,10 @@
 # Pragmara Backend Dependencies
 # Python 3.12+
 
+# PyTorch CPU-only (must be before sentence-transformers)
+--extra-index-url https://download.pytorch.org/whl/cpu
+torch==2.5.1+cpu
+
 # API Framework
 fastapi==0.115.6
 uvicorn[standard]==0.34.0
