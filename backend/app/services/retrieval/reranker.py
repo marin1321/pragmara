@@ -1,8 +1,10 @@
 import asyncio
 import logging
 import time
+from typing import TYPE_CHECKING
 
-from sentence_transformers import CrossEncoder
+if TYPE_CHECKING:
+    from sentence_transformers import CrossEncoder
 
 from app.services.retrieval.hybrid_search import SearchResult
 
@@ -11,12 +13,14 @@ logger = logging.getLogger(__name__)
 MODEL_NAME = "cross-encoder/ms-marco-MiniLM-L-6-v2"
 RERANK_TIMEOUT = 2.0
 
-_model: CrossEncoder | None = None
+_model: "CrossEncoder | None" = None
 
 
-def _get_model() -> CrossEncoder:
+def _get_model() -> "CrossEncoder":
     global _model
     if _model is None:
+        from sentence_transformers import CrossEncoder
+
         logger.info(f"Loading cross-encoder model: {MODEL_NAME}")
         _model = CrossEncoder(MODEL_NAME)
         logger.info("Cross-encoder model loaded")
