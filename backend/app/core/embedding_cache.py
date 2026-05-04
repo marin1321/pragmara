@@ -12,10 +12,10 @@ DEFAULT_TTL = 3600
 
 
 async def get_cached_embedding(text: str) -> list[float] | None:
-    redis = get_redis()
     key = _cache_key(text)
 
     try:
+        redis = await get_redis()
         cached = await redis.get(key)
         if cached:
             logger.debug(f"Embedding cache HIT: {key[:20]}...")
@@ -27,11 +27,11 @@ async def get_cached_embedding(text: str) -> list[float] | None:
 
 
 async def cache_embedding(text: str, embedding: list[float]) -> None:
-    redis = get_redis()
     key = _cache_key(text)
     ttl = getattr(settings, "embedding_cache_ttl", DEFAULT_TTL)
 
     try:
+        redis = await get_redis()
         await redis.set(key, json.dumps(embedding), ex=ttl)
         logger.debug(f"Embedding cache SET: {key[:20]}... (TTL: {ttl}s)")
     except Exception as e:

@@ -19,6 +19,13 @@ async def request_magic_link(
     body: MagicLinkRequest,
     db: AsyncSession = Depends(get_db),
 ) -> dict:
+    redis = await get_redis()
+    if not redis:
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail="Authentication service temporarily unavailable",
+        )
+
     result = await db.execute(select(User).where(User.email == body.email))
     user = result.scalar_one_or_none()
 
@@ -29,7 +36,6 @@ async def request_magic_link(
 
     token = generate_magic_token()
 
-    redis = await get_redis()
     await redis.set(
         f"magic:{token}",
         str(user.id),
@@ -44,6 +50,12 @@ async def request_magic_link(
 @router.get("/verify", response_model=TokenResponse)
 async def verify_magic_link(token: str) -> TokenResponse:
     redis = await get_redis()
+    if not redis:
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail="Authentication service temporarily unavailable",
+        )
+
     user_id = await redis.get(f"magic:{token}")
 
     if user_id is None:

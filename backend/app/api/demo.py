@@ -21,23 +21,28 @@ DEMO_RATE_WINDOW = 86400
 
 
 async def _check_demo_rate_limit(ip: str) -> None:
-    redis = await get_redis()
-    if not redis:
-        return
+    try:
+        redis = await get_redis()
+        if not redis:
+            return
 
-    key = f"demo:rate:{ip}"
-    count = await redis.get(key)
+        key = f"demo:rate:{ip}"
+        count = await redis.get(key)
 
-    if count and int(count) >= DEMO_RATE_LIMIT:
-        raise HTTPException(
-            status_code=status.HTTP_429_TOO_MANY_REQUESTS,
-            detail="Demo limit reached (20 queries/day). Sign up for unlimited access.",
-        )
+        if count and int(count) >= DEMO_RATE_LIMIT:
+            raise HTTPException(
+                status_code=status.HTTP_429_TOO_MANY_REQUESTS,
+                detail="Demo limit reached (20 queries/day). Sign up for unlimited access.",
+            )
 
-    pipe = redis.pipeline()
-    pipe.incr(key)
-    pipe.expire(key, DEMO_RATE_WINDOW)
-    await pipe.execute()
+        pipe = redis.pipeline()
+        pipe.incr(key)
+        pipe.expire(key, DEMO_RATE_WINDOW)
+        await pipe.execute()
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.warning(f"Rate limit check failed (Redis unavailable): {e}")
 
 
 @router.post("/query")
