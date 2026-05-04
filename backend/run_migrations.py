@@ -27,7 +27,11 @@ except Exception as e:
 
 async def run():
     print("Connecting to database...", flush=True)
-    engine = create_async_engine(settings.database_url, echo=False)
+    engine = create_async_engine(
+        settings.database_url,
+        echo=False,
+        connect_args={"statement_cache_size": 0},
+    )
 
     try:
         async with engine.begin() as conn:
