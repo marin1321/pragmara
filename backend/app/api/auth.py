@@ -19,9 +19,6 @@ async def request_magic_link(
     body: MagicLinkRequest,
     db: AsyncSession = Depends(get_db),
 ) -> dict:
-    import logging
-    logger = logging.getLogger(__name__)
-
     redis = await get_redis()
     if not redis:
         raise HTTPException(
@@ -29,39 +26,23 @@ async def request_magic_link(
             detail="Authentication service temporarily unavailable",
         )
 
-    try:
-        result = await db.execute(select(User).where(User.email == body.email))
-        user = result.scalar_one_or_none()
-    except Exception as e:
-        logger.error(f"DB query failed: {type(e).__name__}: {e}")
-        raise HTTPException(status_code=500, detail=f"DB error: {type(e).__name__}: {e}")
+    result = await db.execute(select(User).where(User.email == body.email))
+    user = result.scalar_one_or_none()
 
     if user is None:
-        try:
-            user = User(email=body.email)
-            db.add(user)
-            await db.flush()
-        except Exception as e:
-            logger.error(f"User creation failed: {type(e).__name__}: {e}")
-            raise HTTPException(status_code=500, detail=f"User creation error: {type(e).__name__}: {e}")
+        user = User(email=body.email)
+        db.add(user)
+        await db.flush()
 
     token = generate_magic_token()
 
-    try:
-        await redis.set(
-            f"magic:{token}",
-            str(user.id),
-            ex=settings.magic_link_expire_minutes * 60,
-        )
-    except Exception as e:
-        logger.error(f"Redis set failed: {type(e).__name__}: {e}")
-        raise HTTPException(status_code=500, detail=f"Redis error: {type(e).__name__}: {e}")
+    await redis.set(
+        f"magic:{token}",
+        str(user.id),
+        ex=settings.magic_link_expire_minutes * 60,
+    )
 
-    try:
-        await send_magic_link(body.email, token)
-    except Exception as e:
-        logger.error(f"Email send failed: {type(e).__name__}: {e}")
-        raise HTTPException(status_code=500, detail=f"Email error: {type(e).__name__}: {e}")
+    await send_magic_link(body.email, token)
 
     return {"message": "Magic link sent. Check your email."}
 
