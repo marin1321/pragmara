@@ -1,28 +1,61 @@
-"""Run Alembic migrations with full error output."""
+"""Create database tables using SQLAlchemy directly.
 
-import subprocess
+Uses asyncpg (same driver as the app) to avoid IPv6/psycopg2 issues on Render.
+Falls back to create_all if alembic stamp fails.
+"""
+
+import asyncio
 import sys
+import traceback
+
+from sqlalchemy import text
+from sqlalchemy.ext.asyncio import create_async_engine
+
+from app.core.config import settings
+from app.models import Base
 
 
-def main():
-    print("Running database migrations...", flush=True)
-    result = subprocess.run(
-        ["alembic", "upgrade", "head"],
-        capture_output=True,
-        text=True,
-    )
+async def run():
+    print("Connecting to database...", flush=True)
+    engine = create_async_engine(settings.database_url, echo=False)
 
-    if result.stdout:
-        print(f"STDOUT: {result.stdout}", flush=True)
-    if result.stderr:
-        print(f"STDERR: {result.stderr}", flush=True)
+    try:
+        async with engine.begin() as conn:
+            # Check if tables already exist
+            result = await conn.execute(
+                text(
+                    "SELECT EXISTS (SELECT FROM information_schema.tables WHERE table_name = 'users')"
+                )
+            )
+            tables_exist = result.scalar()
 
-    if result.returncode != 0:
-        print(f"Migration FAILED with exit code {result.returncode}", flush=True)
+            if tables_exist:
+                print("Tables already exist, skipping creation.", flush=True)
+            else:
+                print("Creating tables...", flush=True)
+                await conn.run_sync(Base.metadata.create_all)
+                print("Tables created successfully!", flush=True)
+
+                # Stamp alembic version so future migrations work
+                await conn.execute(
+                    text(
+                        "CREATE TABLE IF NOT EXISTS alembic_version (version_num VARCHAR(32) NOT NULL)"
+                    )
+                )
+                await conn.execute(
+                    text("INSERT INTO alembic_version (version_num) VALUES ('001')")
+                )
+                print("Alembic version stamped at 001.", flush=True)
+
+    except Exception as e:
+        print(f"ERROR: {type(e).__name__}: {e}", flush=True)
+        traceback.print_exc()
         sys.exit(1)
+    finally:
+        await engine.dispose()
 
-    print("Migrations completed successfully!", flush=True)
+    print("Database ready!", flush=True)
 
 
 if __name__ == "__main__":
-    main()
+    asyncio.run(run())

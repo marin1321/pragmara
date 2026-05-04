@@ -3,6 +3,7 @@
 python run_migrations.py
 
 if [ $? -ne 0 ]; then
+    echo "Migration failed, exiting."
     exit 1
 fi
 
