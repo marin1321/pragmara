@@ -1,11 +1,8 @@
 #!/bin/bash
 
-echo "Running database migrations..."
-alembic upgrade head 2>&1
-RESULT=$?
+python run_migrations.py
 
-if [ $RESULT -ne 0 ]; then
-    echo "Migration failed with exit code $RESULT"
+if [ $? -ne 0 ]; then
     exit 1
 fi
 
