@@ -11,6 +11,9 @@ if config.config_file_name is not None:
     fileConfig(config.config_file_name)
 
 db_url = settings.database_url.replace("+asyncpg", "")
+if "sslmode" not in db_url:
+    separator = "&" if "?" in db_url else "?"
+    db_url += f"{separator}sslmode=require"
 config.set_main_option("sqlalchemy.url", db_url)
 
 target_metadata = Base.metadata
