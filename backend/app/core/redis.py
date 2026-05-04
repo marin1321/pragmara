@@ -21,11 +21,14 @@ async def get_redis() -> aioredis.Redis | None:
         return None
 
     try:
-        client = aioredis.from_url(
-            settings.redis_url,
-            decode_responses=True,
-            socket_connect_timeout=5,
-        )
+        kwargs: dict = {
+            "decode_responses": True,
+            "socket_connect_timeout": 5,
+        }
+        if settings.redis_url.startswith("rediss://"):
+            kwargs["ssl_cert_reqs"] = "none"
+
+        client = aioredis.from_url(settings.redis_url, **kwargs)
         await client.ping()
         redis_client = client
         return redis_client
