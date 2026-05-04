@@ -1,18 +1,28 @@
-"""Create database tables using SQLAlchemy directly.
+"""Create database tables using SQLAlchemy directly."""
 
-Uses asyncpg (same driver as the app) to avoid IPv6/psycopg2 issues on Render.
-Falls back to create_all if alembic stamp fails.
-"""
-
-import asyncio
 import sys
 import traceback
 
-from sqlalchemy import text
-from sqlalchemy.ext.asyncio import create_async_engine
+print("run_migrations.py: starting...", flush=True)
 
-from app.core.config import settings
-from app.models import Base
+try:
+    import asyncio
+    print("run_migrations.py: asyncio imported", flush=True)
+
+    from sqlalchemy import text
+    from sqlalchemy.ext.asyncio import create_async_engine
+    print("run_migrations.py: sqlalchemy imported", flush=True)
+
+    from app.core.config import settings
+    print(f"run_migrations.py: settings loaded, db_url starts with: {settings.database_url[:30]}...", flush=True)
+
+    from app.models import Base
+    print(f"run_migrations.py: models imported, tables: {list(Base.metadata.tables.keys())}", flush=True)
+
+except Exception as e:
+    print(f"run_migrations.py: IMPORT ERROR: {type(e).__name__}: {e}", flush=True)
+    traceback.print_exc()
+    sys.exit(1)
 
 
 async def run():
@@ -21,7 +31,6 @@ async def run():
 
     try:
         async with engine.begin() as conn:
-            # Check if tables already exist
             result = await conn.execute(
                 text(
                     "SELECT EXISTS (SELECT FROM information_schema.tables WHERE table_name = 'users')"
@@ -36,7 +45,6 @@ async def run():
                 await conn.run_sync(Base.metadata.create_all)
                 print("Tables created successfully!", flush=True)
 
-                # Stamp alembic version so future migrations work
                 await conn.execute(
                     text(
                         "CREATE TABLE IF NOT EXISTS alembic_version (version_num VARCHAR(32) NOT NULL)"
