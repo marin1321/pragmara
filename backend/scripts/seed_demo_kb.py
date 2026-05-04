@@ -22,6 +22,7 @@ from app.core.database import async_session_factory  # noqa: E402
 from app.models.user import User  # noqa: E402
 from app.models.knowledge_base import KnowledgeBase  # noqa: E402
 from app.models.document import Document  # noqa: E402
+from app.models.ingestion_job import IngestionJob  # noqa: E402
 from app.services.ingestion.pipeline import IngestionPipeline  # noqa: E402
 
 DEMO_EMAIL = "demo@pragmara.dev"
@@ -67,11 +68,14 @@ async def get_or_create_demo_kb(db, user_id: uuid.UUID) -> KnowledgeBase:
         print(f"  Demo KB already exists: {kb.id}")
         return kb
 
+    kb_id = uuid.uuid4()
     kb = KnowledgeBase(
-        id=uuid.uuid4(),
+        id=kb_id,
         user_id=user_id,
         name=DEMO_KB_NAME,
         description=DEMO_KB_DESCRIPTION,
+        slug=f"demo-python-fastapi-{kb_id.hex[:8]}",
+        qdrant_collection=f"kb_{kb_id.hex}",
     )
     db.add(kb)
     await db.commit()
@@ -106,8 +110,9 @@ async def ingest_sample_docs(db, kb: KnowledgeBase) -> None:
             await db.delete(existing)
             await db.commit()
 
+        doc_id = uuid.uuid4()
         doc = Document(
-            id=uuid.uuid4(),
+            id=doc_id,
             kb_id=kb.id,
             name=md_file.name,
             source_type="markdown",
@@ -116,6 +121,14 @@ async def ingest_sample_docs(db, kb: KnowledgeBase) -> None:
             status="pending",
         )
         db.add(doc)
+        await db.flush()
+
+        job = IngestionJob(
+            id=uuid.uuid4(),
+            document_id=doc_id,
+            status="pending",
+        )
+        db.add(job)
         await db.commit()
         await db.refresh(doc)
 
@@ -123,12 +136,7 @@ async def ingest_sample_docs(db, kb: KnowledgeBase) -> None:
 
         try:
             pipeline = IngestionPipeline()
-            await pipeline.run(
-                document_id=doc.id,
-                kb_id=kb.id,
-                file_path=str(md_file),
-                source_type="markdown",
-            )
+            await pipeline.run(document_id=str(doc.id))
             print(f"    ✓ {md_file.name} indexed successfully")
         except Exception as e:
             print(f"    ✗ {md_file.name} failed: {e}")
