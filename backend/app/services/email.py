@@ -23,7 +23,7 @@ async def send_magic_link(email: str, token: str) -> None:
         resend.api_key = settings.resend_api_key
         resend.Emails.send(
             {
-                "from": "Pragmara <noreply@pragmara.dev>",
+                "from": "Pragmara <noreply@oscarmarindev.com>",
                 "to": [email],
                 "subject": "Your Pragmara login link",
                 "html": f"""
