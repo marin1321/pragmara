@@ -6,6 +6,7 @@ import traceback
 
 from sqlalchemy import text
 from sqlalchemy.ext.asyncio import create_async_engine
+from sqlalchemy.pool import NullPool
 
 from app.core.config import settings
 from app.models import Base
@@ -16,6 +17,7 @@ async def run():
     engine = create_async_engine(
         settings.database_url,
         echo=False,
+        poolclass=NullPool,
         connect_args={"statement_cache_size": 0},
     )
 

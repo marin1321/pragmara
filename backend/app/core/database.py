@@ -5,17 +5,15 @@ from sqlalchemy.ext.asyncio import (
     async_sessionmaker,
     create_async_engine,
 )
+from sqlalchemy.pool import NullPool
 
 from app.core.config import settings
 
 engine = create_async_engine(
     settings.database_url,
     echo=settings.app_debug,
-    pool_pre_ping=True,
-    connect_args={
-        "statement_cache_size": 0,
-        "prepared_statement_cache_size": 0,
-    },
+    poolclass=NullPool,
+    connect_args={"statement_cache_size": 0},
 )
 
 async_session_factory = async_sessionmaker(
