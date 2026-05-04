@@ -4,11 +4,18 @@ import asyncio
 import sys
 import traceback
 
-from sqlalchemy import text
-from sqlalchemy.ext.asyncio import create_async_engine
+print("run_migrations.py: importing modules...", flush=True)
 
-from app.core.config import settings
-from app.models import Base
+try:
+    from sqlalchemy import text
+    from sqlalchemy.ext.asyncio import create_async_engine
+    from app.core.config import settings
+    from app.models import Base
+    print("run_migrations.py: imports OK", flush=True)
+except Exception as e:
+    print(f"IMPORT ERROR: {type(e).__name__}: {e}", flush=True)
+    traceback.print_exc()
+    sys.exit(1)
 
 
 async def run():
